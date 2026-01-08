@@ -10,7 +10,7 @@ Spring Framework supports both CDS and AOT cache, and it is recommended that you
 later if available in the JVM version your are using (Java 24+).
 
 To use this feature, an AOT cache should be created for the particular classpath of the
-application. It is possible to create this cache on the deployed instance, or during a
+application. It is possible to create this cache during a
 training run performed for example when packaging the application thanks to an hook-point
 provided by the Spring Framework to ease such use case. Once the cache is available, users
 should opt in to use it via a JVM flag.
@@ -36,13 +36,20 @@ JVM flag to start then exit your Spring application once the
 --
 [tabs]
 ======
-AOT cache::
+AOT cache (Java 24)::
 +
 [source,bash,subs="verbatim,quotes"]
 ----
 # Both commands need to be run with the same classpath
 java -XX:AOTMode=record -XX:AOTConfiguration=app.aotconf -Dspring.context.exit=onRefresh ...
 java -XX:AOTMode=create -XX:AOTConfiguration=app.aotconf -XX:AOTCache=app.aot ...
+----
+
+AOT cache (Java 25+)::
++
+[source,bash,subs="verbatim,quotes"]
+----
+java -XX:AOTCacheOutput=app.aot -Dspring.context.exit=onRefresh ...
 ----
 
 CDS::
@@ -54,6 +61,13 @@ java -XX:ArchiveClassesAtExit=app.jsa -Dspring.context.exit=onRefresh ...
 ----
 ======
 --
+
+NOTE: However, it is important to note that AOT cache stores, among other heuristics, 
+method profiling information. It implies, that in order to get the most efficient AOT cache
+possible it is generally recommended for your service to experience a portion of a real workload,
+so that the generated AOT cache stores the profiling information that is closest to production
+conditions.
+
 
 == Using the cache
 
